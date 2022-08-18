@@ -1,0 +1,59 @@
+name: Build and Push Container Image
+description: Build and push Docker image to Google Artifact Registry
+inputs:
+  name:
+    description: The name of the image to build
+    required: true
+  context:
+    description: The Docker context
+    required: true
+    default: .
+  file:
+    description: The Dockerfile to build
+    required: true
+    default: Dockerfile
+  project:
+    description: The Google Cloud Platform project to push to
+    required: true
+  repository:
+    description: The repository in Google Artifact Registry to push to
+    required: true
+  region:
+    description: The Google Cloud Platform region where the repository is located
+    required: true
+    default: europe-west3
+  serviceAccountKey:
+    description: The Service Account key to authenticate with Google Artifact Registry
+    required: true
+outputs:
+  image:
+    description: The pushed image including the tag
+    value: ${{steps.push.outputs.image}}
+runs:
+  using: composite
+  steps:
+    - name: Generate metadata
+      id: meta
+      shell: bash
+      run: |
+        echo "::set-output name=registry::${{inputs.region}}-docker.pkg.dev"
+        echo "::set-output name=image::${{inputs.region}}-docker.pkg.dev/${{inputs.project}}/${{inputs.repository}}/${{inputs.name}}"
+    - name: Authenticate Docker with Artifact Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{steps.meta.outputs.registry}}
+        username: _json_key
+        password: ${{inputs.serviceAccountKey}}
+    - name: Generate metadata for Docker
+      id: image
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{steps.meta.outputs.image}}
+    - name: Build image and push to Artifact Registry
+      uses: docker/build-push-action@v3
+      with:
+        context: ${{inputs.context}}
+        file: ${{inputs.file}}
+        push: true
+        tags: ${{steps.image.outputs.tags}}
+        labels: ${{steps.image.outputs.labels}}
