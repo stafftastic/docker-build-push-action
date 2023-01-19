@@ -25,6 +25,9 @@ inputs:
   serviceAccountKey:
     description: The Service Account key to authenticate with Google Artifact Registry
     required: true
+  build-args:
+    description: "List of build-time variables"
+    required: false
 outputs:
   image:
     description: The pushed image including the tag
@@ -54,6 +57,7 @@ runs:
       with:
         context: ${{inputs.context}}
         file: ${{inputs.file}}
+        build-args: ${{inputs.build-args}}
         push: true
         tags: ${{steps.image.outputs.tags}}
         labels: ${{steps.image.outputs.labels}}
