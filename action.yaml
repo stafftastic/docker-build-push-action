@@ -28,6 +28,9 @@ inputs:
   build-args:
     description: "List of build-time variables"
     required: false
+  tags:
+    description: Image tag generation parameters
+    required: false
 outputs:
   image:
     description: The pushed image including the tag
@@ -52,6 +55,7 @@ runs:
       uses: docker/metadata-action@v4
       with:
         images: ${{steps.meta.outputs.image}}
+        tags: ${{inputs.tags}}
     - name: Build image and push to Artifact Registry
       uses: docker/build-push-action@v3
       with:
