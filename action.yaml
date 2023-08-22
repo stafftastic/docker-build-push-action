@@ -50,6 +50,7 @@ runs:
         echo "::set-output name=dockerfile::$dockerfile"
         echo "::set-output name=context::$(mktemp -d)"
         echo "::set-output name=image::$image"
+        docker image ls
     - name: Generate metadata
       id: meta
       shell: bash
