@@ -4,14 +4,6 @@ inputs:
   name:
     description: The name of the image to build
     required: true
-  context:
-    description: The Docker context
-    required: true
-    default: .
-  file:
-    description: The Dockerfile to build
-    required: true
-    default: Dockerfile
   project:
     description: The Google Cloud Platform project to push to
     required: true
@@ -25,9 +17,6 @@ inputs:
   serviceAccountKey:
     description: The Service Account key to authenticate with Google Artifact Registry
     required: true
-  build-args:
-    description: "List of build-time variables"
-    required: false
   tags:
     description: Image tag generation parameters
     required: false
@@ -38,6 +27,28 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Enable KVM group perms
+      run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+    - name: Install Nix
+      uses: cachix/install-nix-action@v22
+      with:
+        nix_path: nixpkgs=channel:nixos-23.05
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Build image
+      id: build
+      shell: bash
+      run: |
+        nix build
+        image="$(docker load -qi result | sed 's/^Loaded image: \(.*\)$/\1/')"
+        dockerfile="$(mktemp)"
+        echo "FROM $image" > "$dockerfile"
+        echo "::set-output name=dockerfile::$dockerfile"
+        echo "::set-output name=context::$(mktemp -d)"
+        echo "::set-output name=image::$image"
     - name: Generate metadata
       id: meta
       shell: bash
@@ -59,9 +70,8 @@ runs:
     - name: Build image and push to Artifact Registry
       uses: docker/build-push-action@v3
       with:
-        context: ${{inputs.context}}
-        file: ${{inputs.file}}
-        build-args: ${{inputs.build-args}}
+        context: ${{steps.build.outputs.context}}
+        file: ${{steps.build.outputs.dockerfile}}
         push: true
         tags: ${{steps.image.outputs.tags}}
         labels: ${{steps.image.outputs.labels}}
