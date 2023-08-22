@@ -39,6 +39,8 @@ runs:
         nix_path: nixpkgs=channel:nixos-23.05
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+      with:
+        driver: docker
     - name: Build image
       id: build
       shell: bash
@@ -50,7 +52,6 @@ runs:
         echo "::set-output name=dockerfile::$dockerfile"
         echo "::set-output name=context::$(mktemp -d)"
         echo "::set-output name=image::$image"
-        docker image ls
     - name: Generate metadata
       id: meta
       shell: bash
