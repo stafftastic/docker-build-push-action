@@ -11,6 +11,10 @@ inputs:
   file:
     description: The Dockerfile to be built (for using the image build by nix as a base)
     required: false
+  context:
+    description: The Docker context (only used when file is specified)
+    required: true
+    default: .
   project:
     description: The Google Cloud Platform project to push to
     required: true
@@ -62,6 +66,7 @@ runs:
           echo "dockerfile=$dockerfile" >> $GITHUB_OUTPUT
         else
           echo "dockerfile=${{inputs.file}}" >> $GITHUB_OUTPUT
+          echo "context=${{inputs.context}}" >> $GITHUB_OUTPUT
         fi
     - name: Generate metadata
       id: meta
