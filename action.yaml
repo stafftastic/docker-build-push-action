@@ -8,7 +8,7 @@ inputs:
     description: The derivation to build
     required: true
     default: .#default
-  dockerfile:
+  file:
     description: The Dockerfile to be built (for using the image build by nix as a base)
     required: false
   project:
