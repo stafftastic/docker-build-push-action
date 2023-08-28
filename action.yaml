@@ -55,13 +55,13 @@ runs:
         nix build "${{inputs.derivation}}"
         image="$(docker load -qi result | sed 's/^Loaded image: \(.*\)$/\1/')"
         echo "image=$image" >> $GITHUB_OUTPUT
-        if [ -z "${{inputs.dockerfile}}" ]; then
+        if [ -z "${{inputs.file}}" ]; then
           dockerfile="$(mktemp)"
           echo "FROM $image" > "$dockerfile"
           echo "context=$(mktemp -d)" >> $GITHUB_OUTPUT
           echo "dockerfile=$dockerfile" >> $GITHUB_OUTPUT
         else
-          echo "dockerfile=${{inputs.dockerfile}}" >> $GITHUB_OUTPUT
+          echo "dockerfile=${{inputs.file}}" >> $GITHUB_OUTPUT
         fi
     - name: Generate metadata
       id: meta
