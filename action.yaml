@@ -54,21 +54,21 @@ runs:
       run: |
         nix build
         image="$(docker load -qi result | sed 's/^Loaded image: \(.*\)$/\1/')"
-        echo "::set-output name=image::$image"
+        echo "image=$image" >> $GITHUB_OUTPUT
         if [ -z "${{inputs.dockerfile}}" ]; then
           dockerfile="$(mktemp)"
           echo "FROM $image" > "$dockerfile"
-          echo "::set-output name=context::$(mktemp -d)"
-          echo "::set-output name=dockerfile::$dockerfile"
+          echo "context=$(mktemp -d)" >> $GITHUB_OUTPUT
+          echo "dockerfile=$dockerfile" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=dockerfile::${{inputs.dockerfile}}"
+          echo "dockerfile=${{inputs.dockerfile}}" >> $GITHUB_OUTPUT
         fi
     - name: Generate metadata
       id: meta
       shell: bash
       run: |
-        echo "::set-output name=registry::${{inputs.region}}-docker.pkg.dev"
-        echo "::set-output name=image::${{inputs.region}}-docker.pkg.dev/${{inputs.project}}/${{inputs.repository}}/${{inputs.name}}"
+        echo "registry=${{inputs.region}}-docker.pkg.dev" >> $GITHUB_OUTPUT
+        echo "image=${{inputs.region}}-docker.pkg.dev/${{inputs.project}}/${{inputs.repository}}/${{inputs.name}}" >> $GITHUB_OUTPUT
     - name: Authenticate Docker with Artifact Registry
       uses: docker/login-action@v2
       with:
