@@ -28,6 +28,9 @@ inputs:
   serviceAccountKey:
     description: The Service Account key to authenticate with Google Artifact Registry
     required: true
+  build-args:
+    description: List of build-time variables
+    required: false
   tags:
     description: Image tag generation parameters
     required: false
@@ -92,6 +95,7 @@ runs:
       with:
         context: ${{steps.build.outputs.context}}
         file: ${{steps.build.outputs.dockerfile}}
+        build-args: ${{inputs.build-args}}
         push: true
         tags: ${{steps.image.outputs.tags}}
         labels: ${{steps.image.outputs.labels}}
