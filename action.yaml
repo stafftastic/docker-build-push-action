@@ -95,6 +95,7 @@ runs:
       with:
         context: ${{steps.build.outputs.context}}
         file: ${{steps.build.outputs.dockerfile}}
+        platforms: linux/amd64,linux/arm64
         build-args: ${{inputs.build-args}}
         push: true
         tags: ${{steps.image.outputs.tags}}
