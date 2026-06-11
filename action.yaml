@@ -31,6 +31,9 @@ inputs:
   build-args:
     description: List of build-time variables
     required: false
+  secrets:
+    description: List of secrets to expose to the build (never stored in image layers)
+    required: false
   tags:
     description: Image tag generation parameters
     required: false
@@ -89,11 +92,13 @@ runs:
         images: ${{steps.meta.outputs.image}}
         tags: ${{inputs.tags}}
     - name: Build image and push to Artifact Registry
+      id: push
       uses: docker/build-push-action@v3
       with:
         context: ${{steps.build.outputs.context}}
         file: ${{steps.build.outputs.dockerfile}}
         build-args: ${{inputs.build-args}}
+        secrets: ${{inputs.secrets}}
         push: true
         tags: ${{steps.image.outputs.tags}}
         labels: ${{steps.image.outputs.labels}}
