@@ -15,7 +15,7 @@ This action no longer installs Nix. It expects a runner with Nix preinstalled
 authentication and the binary cache. Callers must run both of these before
 invoking the action:
 
-1. `./.github/actions/nix-install` — exports `NIX_CONFIG` with an
+1. `./.github/actions/nix-auth` — exports `NIX_CONFIG` with an
    `access-tokens` entry so private `github:stafftastic/*` flake inputs resolve.
 2. `Mic92/niks3-action` — points Nix at the shared binary cache, so the base
    image closure is substituted instead of rebuilt.
@@ -31,7 +31,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/nix-install
+      - uses: ./.github/actions/nix-auth
         with:
           private-key: ${{secrets.NIX_REPOSITORY_ACCESS_PRIVATE_KEY}}
       - uses: Mic92/niks3-action@12d3e320b2a99b7938f9634bd337cd9fec104609 # v1.1.0
